@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аудиогид - Защищённый плеер</title>
+    <title>Аудиогид с перемоткой</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,40 +16,16 @@
         .custom-player {
             position: relative;
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Скрываем стандартные элементы управления */
-        audio {
-            display: block;
-            width: 100%;
-            height: 40px;
-            -webkit-media-controls {
-                display: none !important;
-            }
-        }
-
-        audio::-webkit-media-controls-panel {
-            display: none !important;
-        }
-
-        audio::-webkit-media-controls-play-button,
-        audio::-webkit-media-controls-download-button,
-        audio::-webkit-media-controls-timeline,
-        audio::-webkit-media-controls-current-time-display,
-        audio::-webkit-media-controls-time-remaining-display,
-        audio::-webkit-media-controls-mute-button,
-        audio::-webkit-media-controls-volume-slider {
-            display: none !important;
         }
 
         .controls {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         .play-btn {
@@ -60,26 +36,29 @@
             border-radius: 50%;
             color: white;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-size: 16px;
         }
 
         .progress-container {
             flex-grow: 1;
-            height: 4px;
-            background: #eee;
-            border-radius: 2px;
             position: relative;
         }
 
-        .progress-bar {
-            height: 100%;
-            background: #3498db;
-            width: 0%;
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #eee;
             border-radius: 2px;
-            transition: width 0.1s linear;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
         }
 
         .time {
@@ -92,15 +71,13 @@
 </head>
 <body>
     <div class="custom-player">
-        <div class="track-title">Экскурсия "История искусства"</div>
-        <audio id="audioPlayer">
-            <source src="https://raw.githubusercontent.com/ВАШ_ЛОГИН/ВАШ_РЕПОЗИТОРИЙ/main/audio/guide.mp3" type="audio/mpeg">
-        </audio>
+        <div class="track-title">Экскурсия "Современное искусство"</div>
+        <audio id="audioPlayer"></audio>
         
         <div class="controls">
             <button class="play-btn" id="playBtn">▶</button>
             <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
+                <input type="range" id="seekBar" value="0" min="0">
             </div>
             <div class="time" id="timeDisplay">0:00 / 0:00</div>
         </div>
@@ -113,10 +90,10 @@
             if (e.ctrlKey && (e.key === 's' || e.key === 'u')) e.preventDefault();
         });
 
-        // Инициализация аудио
-        const audio = document.getElementById('audioPlayer');
+        // Инициализация элементов
+        const audio = new Audio();
         const playBtn = document.getElementById('playBtn');
-        const progressBar = document.getElementById('progressBar');
+        const seekBar = document.getElementById('seekBar');
         const timeDisplay = document.getElementById('timeDisplay');
 
         // Динамическая загрузка аудио
@@ -124,6 +101,12 @@
             .then(response => response.blob())
             .then(blob => {
                 audio.src = URL.createObjectURL(blob);
+                
+                // Установка максимального значения для seekBar после загрузки метаданных
+                audio.addEventListener('loadedmetadata', () => {
+                    seekBar.max = audio.duration;
+                    updateTimeDisplay();
+                });
             });
 
         // Управление воспроизведением
@@ -139,22 +122,48 @@
 
         // Обновление прогресса
         audio.addEventListener('timeupdate', () => {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = `${progress}%`;
-            
-            const formatTime = (seconds) => {
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
-            };
-            
-            timeDisplay.textContent = 
-                `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+            if (!seekBar.dragging) {
+                seekBar.value = audio.currentTime;
+                updateTimeDisplay();
+            }
         });
 
-        // Сброс кнопки при окончании
+        // Перемотка при изменении ползунка
+        let seeking = false;
+        seekBar.addEventListener('input', () => {
+            seeking = true;
+            audio.currentTime = seekBar.value;
+            updateTimeDisplay();
+        });
+
+        // Форматирование времени
+        const formatTime = (seconds) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        };
+
+        // Обновление отображения времени
+        const updateTimeDisplay = () => {
+            timeDisplay.textContent = 
+                `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        };
+
+        // Обработка окончания воспроизведения
         audio.addEventListener('ended', () => {
             playBtn.textContent = '▶';
+            seekBar.value = 0;
+            updateTimeDisplay();
+        });
+
+        // Блокировка стандартного поведения ползунка
+        seekBar.addEventListener('mousedown', () => {
+            seekBar.dragging = true;
+        });
+
+        seekBar.addEventListener('mouseup', () => {
+            seekBar.dragging = false;
+            audio.currentTime = seekBar.value;
         });
     </script>
 </body>
