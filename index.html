@@ -2,9 +2,19 @@
 <html>
 <head>
     <title>Аудиогид</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .player { margin: 30px 0; border-radius: 12px; overflow: hidden; }
+    </style>
 </head>
 <body>
-    <h1>Добро пожаловать!</h1>
-    <audio src="audio/anna.mp3" controls></audio>
+    <h1>Аудиогид по музею</h1>
+    <div class="player">
+        <iframe
+          frameborder="0"
+          style="border:none;width:100%;height:150px;"
+          src="https://music.yandex.ru/iframe/playlist/golohvastov2000/1001?lang=ru&owner=false">
+        </iframe>
+    </div>
 </body>
 </html>
