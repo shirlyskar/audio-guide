@@ -1,170 +1,52 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аудиогид с перемоткой</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: #f8f9fa;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аудиогид: Анна</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-        .custom-player {
-            position: relative;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+    audio {
+      width: 300px;
+    }
 
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-        }
+    audio::-internal-media-controls-download-button {
+      display: none;
+    }
 
-        .play-btn {
-            background: #3498db;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
+    audio::-webkit-media-controls-enclosure {
+      overflow: hidden;
+    }
 
-        .progress-container {
-            flex-grow: 1;
-            position: relative;
-        }
+    audio::-webkit-media-controls-panel {
+      width: 100%;
+    }
 
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            -webkit-appearance: none;
-            background: #eee;
-            border-radius: 2px;
-        }
+    audio::-webkit-media-controls-play-button,
+    audio::-webkit-media-controls-volume-slider-container {
+      display: block;
+    }
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            background: #3498db;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .time {
-            font-size: 0.9em;
-            color: #666;
-            min-width: 100px;
-            text-align: right;
-        }
-    </style>
+    /* Убираем кнопку скачивания в Chrome */
+    audio[controls]::part(download-button) {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="custom-player">
-        <div class="track-title">Экскурсия "Современное искусство"</div>
-        <audio id="audioPlayer"></audio>
-        
-        <div class="controls">
-            <button class="play-btn" id="playBtn">▶</button>
-            <div class="progress-container">
-                <input type="range" id="seekBar" value="0" min="0">
-            </div>
-            <div class="time" id="timeDisplay">0:00 / 0:00</div>
-        </div>
-    </div>
-
-    <script>
-        // Защита контента
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.ctrlKey && (e.key === 's' || e.key === 'u')) e.preventDefault();
-        });
-
-        // Инициализация элементов
-        const audio = new Audio();
-        const playBtn = document.getElementById('playBtn');
-        const seekBar = document.getElementById('seekBar');
-        const timeDisplay = document.getElementById('timeDisplay');
-
-        // Динамическая загрузка аудио
-        fetch('https://raw.githubusercontent.com/shirlyskar/audio-guide/main/audio/anna2.mp3')
-            .then(response => response.blob())
-            .then(blob => {
-                audio.src = URL.createObjectURL(blob);
-                
-                // Установка максимального значения для seekBar после загрузки метаданных
-                audio.addEventListener('loadedmetadata', () => {
-                    seekBar.max = audio.duration;
-                    updateTimeDisplay();
-                });
-            });
-
-        // Управление воспроизведением
-        playBtn.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                playBtn.textContent = '⏸';
-            } else {
-                audio.pause();
-                playBtn.textContent = '▶';
-            }
-        });
-
-        // Обновление прогресса
-        audio.addEventListener('timeupdate', () => {
-            if (!seekBar.dragging) {
-                seekBar.value = audio.currentTime;
-                updateTimeDisplay();
-            }
-        });
-
-        // Перемотка при изменении ползунка
-        let seeking = false;
-        seekBar.addEventListener('input', () => {
-            seeking = true;
-            audio.currentTime = seekBar.value;
-            updateTimeDisplay();
-        });
-
-        // Форматирование времени
-        const formatTime = (seconds) => {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        };
-
-        // Обновление отображения времени
-        const updateTimeDisplay = () => {
-            timeDisplay.textContent = 
-                `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-        };
-
-        // Обработка окончания воспроизведения
-        audio.addEventListener('ended', () => {
-            playBtn.textContent = '▶';
-            seekBar.value = 0;
-            updateTimeDisplay();
-        });
-
-        // Блокировка стандартного поведения ползунка
-        seekBar.addEventListener('mousedown', () => {
-            seekBar.dragging = true;
-        });
-
-        seekBar.addEventListener('mouseup', () => {
-            seekBar.dragging = false;
-            audio.currentTime = seekBar.value;
-        });
-    </script>
+  <h1>Аудиогид: Анна</h1>
+  <audio controls controlsList="nodownload">
+    <source src="https://raw.githubusercontent.com/shirlyskar/audio-guide/main/audio/anna2.mp3" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио.
+  </audio>
 </body>
 </html>
