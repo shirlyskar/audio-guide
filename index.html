@@ -3,99 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аудиогид</title>
+    <title>Аудиогид - Музей истории</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 30px;
-            background-color: #f8f9fa;
-            color: #333;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
         }
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-        .player-wrapper {
-            background: white;
+            padding: 40px 0;
+            background-color: #2c3e50;
+            color: white;
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 40px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        .yandex-player {
-            width: 100%;
-            height: 400px; /* Увеличенная высота */
-            border: none;
-            border-radius: 10px;
-            background: #f1f3f4;
-        }
-        .content {
+
+        .audio-section {
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            line-height: 1.7;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        .footer {
+
+        .player-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 соотношение */
+            margin: 20px 0;
+        }
+
+        .drive-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .track-list {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        footer {
             text-align: center;
-            margin-top: 40px;
             padding: 20px;
             color: #666;
-            font-size: 14px;
+            margin-top: 50px;
         }
+
         @media (max-width: 768px) {
             body {
-                padding: 15px;
+                padding: 10px;
             }
-            .yandex-player {
-                height: 300px;
+            
+            .header {
+                padding: 20px 0;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Аудиогид по музею</h1>
-        <p>Иммерсивное аудиопутешествие по экспозиции</p>
+        <h1>Аудиогид по Музею Современного Искусства</h1>
+        <p>Погрузитесь в мир искусства через аудиорассказы</p>
     </div>
 
-    <div class="player-wrapper">
-        <iframe 
-            class="yandex-player"
-            src="https://music.yandex.ru/iframe/playlist/golohvastov2000/1001/show"
-            allow="autoplay">
-        </iframe>
+    <div class="audio-section">
+        <h2>Основная экспозиция</h2>
+        <div class="player-container">
+            <iframe 
+                class="drive-player"
+                src="https://drive.google.com/file/d/1AewWG_Y5ZM0CFQz0uHmX2eaTKjYqFknD/preview"
+                allow="autoplay">
+            </iframe>
+        </div>
+        
+        <div class="track-list">
+            <h3>Список разделов:</h3>
+            <ol>
+                <li>Введение в экспозицию</li>
+                <li>Художники-авангардисты</li>
+                <li>Современные инсталляции</li>
+                <li>Интерактивные экспонаты</li>
+                <li>Заключение</li>
+            </ol>
+        </div>
     </div>
 
-    <div class="content">
-        <h2>О вашем аудиогиде</h2>
-        <p>Этот аудиогид создан для полного погружения в атмосферу музея. Плейлист содержит:</p>
-        <ul>
-            <li>Основную экскурсионную программу (треки 1-5)</li>
-            <li>Дополнительные материалы (треки 6-10)</li>
-            <li>Интервью с куратором выставки</li>
-        </ul>
-        <p>Для наилучшего опыта рекомендуем использовать наушники.</p>
+    <div class="audio-section">
+        <h2>Дополнительные материалы</h2>
+        <div class="player-container">
+            <iframe 
+                class="drive-player"
+                src="https://drive.google.com/file/d/ВАШ_ID_ФАЙЛА_2/preview"
+                allow="autoplay">
+            </iframe>
+        </div>
     </div>
 
-    <div class="footer">
-        <p>© 2023 Музейный аудиогид. Все права защищены.</p>
-    </div>
+    <footer>
+        <p>© 2023 Музей Современного Искусства. Все аудиоматериалы защищены авторским правом.</p>
+        <p>Техническая поддержка: audioguide@museum.ru</p>
+    </footer>
 
     <script>
-        // Защита контента
+        // Блокировка контекстного меню
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             alert('Для защиты авторских прав функция сохранения отключена');
         });
-        
-        // Дополнительные меры защиты
+
+        // Блокировка клавиш для разработчиков
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'p')) {
                 e.preventDefault();
