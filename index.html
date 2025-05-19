@@ -3,99 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Защищённый аудиогид</title>
+    <title>Аудиогид - Защищённый плеер</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 30px;
-            background: #f5f5f5;
-        }
-
-        .player-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin: 20px 0;
-        }
-
-        .player-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .track-info {
-            flex-grow: 1;
-        }
-
-        .track-title {
-            color: #2c3e50;
-            margin: 0;
-            font-size: 1.2em;
-        }
-
-        .track-duration {
-            color: #7f8c8d;
-            font-size: 0.9em;
+            padding: 40px 20px;
+            background: #f8f9fa;
         }
 
         .custom-player {
-            width: 100%;
             position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Скрываем стандартные элементы управления */
+        audio {
+            display: block;
+            width: 100%;
+            height: 40px;
+            -webkit-media-controls {
+                display: none !important;
+            }
+        }
+
+        audio::-webkit-media-controls-panel {
+            display: none !important;
+        }
+
+        audio::-webkit-media-controls-play-button,
+        audio::-webkit-media-controls-download-button,
+        audio::-webkit-media-controls-timeline,
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display,
+        audio::-webkit-media-controls-mute-button,
+        audio::-webkit-media-controls-volume-slider {
+            display: none !important;
         }
 
         .controls {
             display: flex;
             align-items: center;
             gap: 15px;
+            margin-top: 10px;
         }
 
-        button {
+        .play-btn {
             background: #3498db;
             border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
             cursor: pointer;
-            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
         }
 
-        button:hover {
-            background: #2980b9;
-        }
-
-        input[type="range"] {
+        .progress-container {
             flex-grow: 1;
             height: 4px;
-            background: #ddd;
+            background: #eee;
             border-radius: 2px;
+            position: relative;
         }
 
-        .time-display {
+        .progress-bar {
+            height: 100%;
+            background: #3498db;
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+
+        .time {
             font-size: 0.9em;
-            color: #7f8c8d;
+            color: #666;
+            min-width: 100px;
+            text-align: right;
         }
     </style>
 </head>
 <body>
-    <!-- Основная дорожка -->
-    <div class="player-card">
-        <div class="player-header">
-            <div class="track-info">
-                <div class="track-title">1. Основная экскурсия</div>
-                <div class="track-duration">45 минут</div>
+    <div class="custom-player">
+        <div class="track-title">Экскурсия "История искусства"</div>
+        <audio id="audioPlayer">
+            <source src="https://raw.githubusercontent.com/ВАШ_ЛОГИН/ВАШ_РЕПОЗИТОРИЙ/main/audio/guide.mp3" type="audio/mpeg">
+        </audio>
+        
+        <div class="controls">
+            <button class="play-btn" id="playBtn">▶</button>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
             </div>
-        </div>
-        <div class="custom-player">
-            <div class="controls">
-                <button id="playPause">▶</button>
-                <input type="range" id="progress" value="0">
-                <div class="time-display" id="time">0:00 / 45:00</div>
-            </div>
+            <div class="time" id="timeDisplay">0:00 / 0:00</div>
         </div>
     </div>
 
@@ -106,58 +113,49 @@
             if (e.ctrlKey && (e.key === 's' || e.key === 'u')) e.preventDefault();
         });
 
-        // Кастомный плеер
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let audioBuffer;
-        let audioSource;
-        let isPlaying = false;
-        let startTime;
-        let pauseTime = 0;
+        // Инициализация аудио
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
 
-        // Загрузка аудио
-        fetch('https://raw.githubusercontent.com/shirlyskar/audio-guide/main/audio/anna.mp3')
-            .then(response => response.arrayBuffer())
-            .then(data => audioContext.decodeAudioData(data))
-            .then(buffer => {
-                audioBuffer = buffer;
+        // Динамическая загрузка аудио
+        fetch('https://raw.githubusercontent.com/shirlyskar/audio-guide/main/audio/anna2.mp3')
+            .then(response => response.blob())
+            .then(blob => {
+                audio.src = URL.createObjectURL(blob);
             });
 
         // Управление воспроизведением
-        document.getElementById('playPause').addEventListener('click', () => {
-            if (!isPlaying) {
-                startTime = audioContext.currentTime - pauseTime;
-                audioSource = audioContext.createBufferSource();
-                audioSource.buffer = audioBuffer;
-                audioSource.connect(audioContext.destination);
-                audioSource.start(0, pauseTime);
-                isPlaying = true;
-                document.getElementById('playPause').textContent = '⏸';
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playBtn.textContent = '⏸';
             } else {
-                pauseTime = audioContext.currentTime - startTime;
-                audioSource.stop();
-                isPlaying = false;
-                document.getElementById('playPause').textContent = '▶';
+                audio.pause();
+                playBtn.textContent = '▶';
             }
         });
 
         // Обновление прогресса
-        setInterval(() => {
-            if (isPlaying) {
-                const currentTime = audioContext.currentTime - startTime;
-                const progress = (currentTime / audioBuffer.duration) * 100;
-                document.getElementById('progress').value = progress;
-                
-                // Форматирование времени
-                const formatTime = (seconds) => {
-                    const mins = Math.floor(seconds / 60);
-                    const secs = Math.floor(seconds % 60);
-                    return `${mins}:${secs.toString().padStart(2, '0')}`;
-                };
-                
-                document.getElementById('time').textContent = 
-                    `${formatTime(currentTime)} / ${formatTime(audioBuffer.duration)}`;
-            }
-        }, 500);
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            };
+            
+            timeDisplay.textContent = 
+                `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        });
+
+        // Сброс кнопки при окончании
+        audio.addEventListener('ended', () => {
+            playBtn.textContent = '▶';
+        });
     </script>
 </body>
 </html>
