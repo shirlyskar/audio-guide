@@ -3,57 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Защищённый аудиогид</title>
+    <title>Аудиогид - Музей Искусств</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
+            padding: 30px 20px;
+            background: #f8f9fa;
         }
-        .player-container {
+
+        .track {
             background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin: 20px 0;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 25px;
         }
+
+        .track-info {
+            flex: 1;
+            min-width: 160px;
+            padding-right: 20px;
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .track-title {
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .track-description {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
         audio {
-            width: 100%;
-            margin: 15px 0;
+            flex: 2;
+            min-width: 300px;
+            height: 50px;
+        }
+
+        @media (max-width: 640px) {
+            .track {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .track-info {
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+                padding-bottom: 15px;
+                width: 100%;
+            }
+            
+            audio {
+                width: 100%;
+                min-width: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="player-container">
-        <h2>Экскурсия по музею</h2>
-        <audio id="audioPlayer" controls>
-            Ваш браузер не поддерживает аудио элементы.
+    <!-- Первая дорожка -->
+    <div class="track">
+        <div class="track-info">
+            <div class="track-title">1. Основная экскурсия</div>
+            <div class="track-description">
+                Полная версия аудиогида<br>
+                Продолжительность: 45 мин
+            </div>
+        </div>
+        <audio controls>
+            <source src="https://raw.githubusercontent.com/ВАШ_ЛОГИН/ВАШ_РЕПОЗИТОРИЙ/main/audio/main.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- Вторая дорожка -->
+    <div class="track">
+        <div class="track-info">
+            <div class="track-title">2. Детский маршрут</div>
+            <div class="track-description">
+                Интерактивная версия для детей<br>
+                Продолжительность: 25 мин
+            </div>
+        </div>
+        <audio controls>
+            <source src="https://raw.githubusercontent.com/ВАШ_ЛОГИН/ВАШ_РЕПОЗИТОРИЙ/main/audio/kids.mp3" type="audio/mpeg">
         </audio>
     </div>
 
     <script>
-        // Базовый защитный механизм
+        // Защита контента
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
             if (e.ctrlKey && (e.key === 's' || e.key === 'u')) e.preventDefault();
         });
 
-        // Динамическая загрузка аудио
-        const audio = document.getElementById('audioPlayer');
-        
-        // Путь к аудиофайлу в вашем репозитории
-        const audioUrl = 'https://raw.githubusercontent.com/shirlyskar/audio-guide/main/audio/anna.mp3';
+        // Динамическая загрузка через Blob
+        const loadSecureAudio = (element) => {
+            const url = element.querySelector('source').src;
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const objectURL = URL.createObjectURL(blob);
+                    element.src = objectURL;
+                });
+        };
 
-        // Создаём непрямую ссылку
-        fetch(audioUrl)
-            .then(response => response.blob())
-            .then(blob => {
-                const objectURL = URL.createObjectURL(blob);
-                audio.src = objectURL;
-            })
-            .catch(error => console.error('Ошибка загрузки аудио:', error));
+        document.querySelectorAll('audio').forEach(loadSecureAudio);
     </script>
 </body>
 </html>
